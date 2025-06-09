@@ -1,6 +1,6 @@
 const BLOG = {
-  title: 'Bank Lirik Lagu',
-  author: 'michail',
+  title: 'LYRICUS',
+  author: 'Michail',
   email: 'youthmultimediakbc@gmail.com',
   link: 'https://nobelium.vercel.app',
   description: 'Kumpulan lirik lagu worship & praise untuk tim multimedia dan ibadah.',
