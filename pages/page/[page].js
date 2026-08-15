@@ -35,15 +35,9 @@ export async function getStaticProps (context) {
 }
 
 export async function getStaticPaths () {
-  const posts = await getAllPosts({ includePages: false })
-  const totalPosts = posts.length
-  const totalPages = Math.ceil(totalPosts / config.postsPerPage)
   return {
-    // remove first page, we 're not gonna handle that.
-    paths: Array.from({ length: totalPages - 1 }, (_, i) => ({
-      params: { page: '' + (i + 2) }
-    })),
-    fallback: true
+    paths: [],
+    fallback: 'blocking'
   }
 }
 
