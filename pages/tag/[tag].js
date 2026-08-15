@@ -23,8 +23,10 @@ export async function getStaticProps ({ params }) {
 }
 
 export async function getStaticPaths () {
+  const posts = await getAllPosts({ includePages: false })
+  const tags = getAllTagsFromPosts(posts)
   return {
-    paths: [],
-    fallback: 'blocking'
+    paths: Object.keys(tags).map(tag => ({ params: { tag } })),
+    fallback: true
   }
 }
