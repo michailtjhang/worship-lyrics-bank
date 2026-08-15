@@ -114,11 +114,12 @@ export default function NotionRenderer (props) {
   }[config.font]
 
   // Mark block types to be custom rendered by appending a suffix
-  if (props.recordMap?.block) {
-    for (const item of Object.values(props.recordMap.block)) {
-      const block = item?.value
-      if (block?.type === 'toggle') {
-        block.type = 'toggle_nobelium'
+  if (props.recordMap) {
+    for (const { value: block } of Object.values(props.recordMap.block)) {
+      switch (block?.type) {
+        case 'toggle':
+          block.type += '_nobelium'
+          break
       }
     }
   }
