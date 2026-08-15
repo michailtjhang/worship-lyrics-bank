@@ -2,7 +2,8 @@ import { clientConfig } from '@/lib/server/config'
 
 import { useRouter } from 'next/router'
 import cn from 'classnames'
-import { getAllPosts, getPostBlocks } from '@/lib/notion'
+import { getPostBlocks } from '@/lib/notion'
+import { getAllPosts } from '@/lib/notion/getAllPosts'
 import { useLocale } from '@/lib/locale'
 import { useConfig } from '@/lib/config'
 import { createHash } from 'crypto'
@@ -71,28 +72,34 @@ export default function BlogPost({ post, blockMap, emailHash }) {
 }
 
 export async function getStaticPaths() {
-  const posts = await getAllPosts({ includePages: true })
+  // Skip Notion API calls at build time to avoid Cloudflare 403.
+  // Pages are generated on-demand on first request (fallback: blocking).
   return {
-    paths: (posts ?? []).map(row => `${clientConfig.path}/${row.slug}`),
-    fallback: true
+    paths: [],
+    fallback: 'blocking'
   }
 }
 
 export async function getStaticProps({ params: { slug } }) {
-  const posts = await getAllPosts({ includePages: true })
-  const post = posts.find(t => t.slug === slug)
+  try {
+    const posts = await getAllPosts({ includePages: true })
+    const post = posts.find(t => t.slug === slug)
 
-  if (!post) return { notFound: true }
+    if (!post) return { notFound: true }
 
-  const blockMap = await getPostBlocks(post.id)
-  const emailHash = createHash('md5')
-    .update(clientConfig.email)
-    .digest('hex')
-    .trim()
-    .toLowerCase()
+    const blockMap = await getPostBlocks(post.id)
+    const emailHash = createHash('md5')
+      .update(clientConfig.email)
+      .digest('hex')
+      .trim()
+      .toLowerCase()
 
-  return {
-    props: { post, blockMap, emailHash },
-    revalidate: 1
+    return {
+      props: { post, blockMap, emailHash },
+      revalidate: 1
+    }
+  } catch (err) {
+    console.error('[slug] Failed to load post:', err.message)
+    return { notFound: true }
   }
 }

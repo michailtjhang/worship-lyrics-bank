@@ -7,11 +7,17 @@ export default function Tag ({ tags, posts, currentTag }) {
 
 export async function getStaticProps ({ params }) {
   const currentTag = params.tag
-  const posts = await getAllPosts({ includePages: false })
-  const tags = getAllTagsFromPosts(posts)
-  const filteredPosts = posts.filter(
-    post => post && post.tags && post.tags.includes(currentTag)
-  )
+  let tags = {}
+  let filteredPosts = []
+  try {
+    const posts = await getAllPosts({ includePages: false })
+    tags = getAllTagsFromPosts(posts)
+    filteredPosts = posts.filter(
+      post => post && post.tags && post.tags.includes(currentTag)
+    )
+  } catch (err) {
+    console.error('[tag] Failed to load posts:', err.message)
+  }
   return {
     props: {
       tags,
@@ -23,10 +29,8 @@ export async function getStaticProps ({ params }) {
 }
 
 export async function getStaticPaths () {
-  const posts = await getAllPosts({ includePages: false })
-  const tags = getAllTagsFromPosts(posts)
   return {
-    paths: Object.keys(tags).map(tag => ({ params: { tag } })),
-    fallback: true
+    paths: [],
+    fallback: 'blocking'
   }
 }
